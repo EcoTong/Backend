@@ -1,21 +1,26 @@
 'use strict';
-
+/**
+ * id comments pk
+id posting fk
+id user fk
+content 
+ */
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Posts', {
+  async up (queryInterface, Sequelize) {
+    await queryInterface.createTable('Comments', {
       id: {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.STRING
       },
+      post_id: {
+        type: Sequelize.STRING
+      },
       username: {
         type: Sequelize.STRING
       },
-      picture: {
-        type: Sequelize.STRING
-      },
-      category: {
+      content: {
         type: Sequelize.STRING
       },
       createdAt: {
@@ -26,10 +31,20 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
-    }).then(() => queryInterface.addConstraint('Posts', {
+    }).then(() => queryInterface.addConstraint('Comments', {
+      fields: ['post_id'],
+      type: 'foreign key',
+      name: 'fk_comments_post_id',
+      references: {
+        table: 'Posts',
+        field: 'id'
+      },
+      onDelete: 'cascade',
+      onUpdate: 'cascade'
+    })).then(() => queryInterface.addConstraint('Comments', {
       fields: ['username'],
       type: 'foreign key',
-      name: 'fk_posts_username',
+      name: 'fk_comments_username',
       references: {
         table: 'Users',
         field: 'username'
@@ -39,7 +54,7 @@ module.exports = {
     }));
   },
 
-  async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Posts');
+  async down (queryInterface, Sequelize) {
+    await queryInterface.dropTable('Comments');
   }
 };

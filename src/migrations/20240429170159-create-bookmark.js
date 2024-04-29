@@ -1,9 +1,14 @@
 'use strict';
-
+/**
+ * 
+id pk
+username fk
+post_id fk
+ */
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Posts', {
+  async up (queryInterface, Sequelize) {
+    await queryInterface.createTable('Bookmarks', {
       id: {
         allowNull: false,
         primaryKey: true,
@@ -12,10 +17,7 @@ module.exports = {
       username: {
         type: Sequelize.STRING
       },
-      picture: {
-        type: Sequelize.STRING
-      },
-      category: {
+      post_id: {
         type: Sequelize.STRING
       },
       createdAt: {
@@ -26,20 +28,30 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
-    }).then(() => queryInterface.addConstraint('Posts', {
+    }).then(() => queryInterface.addConstraint('Bookmarks', {
       fields: ['username'],
       type: 'foreign key',
-      name: 'fk_posts_username',
+      name: 'fk_bookmarks_username',
       references: {
         table: 'Users',
         field: 'username'
       },
       onDelete: 'cascade',
       onUpdate: 'cascade'
+    })).then(() => queryInterface.addConstraint('Bookmarks', {
+      fields: ['post_id'],
+      type: 'foreign key',
+      name: 'fk_bookmarks_post_id',
+      references: {
+        table: 'Posts',
+        field: 'id'
+      },
+      onDelete: 'cascade',
+      onUpdate: 'cascade'
     }));
   },
 
-  async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Posts');
+  async down (queryInterface, Sequelize) {
+    await queryInterface.dropTable('Bookmarks');
   }
 };

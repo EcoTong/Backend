@@ -1,9 +1,19 @@
 'use strict';
 
+/**
+ * id quest pk
+username fk
+prize
+description
+category
+bahan pelengkap ???
+status
+picture
+ */
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Posts', {
+  async up (queryInterface, Sequelize) {
+    await queryInterface.createTable('Quests', {
       id: {
         allowNull: false,
         primaryKey: true,
@@ -12,10 +22,19 @@ module.exports = {
       username: {
         type: Sequelize.STRING
       },
-      picture: {
+      prize: {
+        type: Sequelize.INTEGER
+      },
+      description: {
         type: Sequelize.STRING
       },
       category: {
+        type: Sequelize.STRING
+      },
+      status: {
+        type: Sequelize.BOOLEAN
+      },
+      picture: {
         type: Sequelize.STRING
       },
       createdAt: {
@@ -26,10 +45,10 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
-    }).then(() => queryInterface.addConstraint('Posts', {
+    }).then(() => queryInterface.addConstraint('Quests', {
       fields: ['username'],
       type: 'foreign key',
-      name: 'fk_posts_username',
+      name: 'fk_quest_username',
       references: {
         table: 'Users',
         field: 'username'
@@ -39,7 +58,7 @@ module.exports = {
     }));
   },
 
-  async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Posts');
+  async down (queryInterface, Sequelize) {
+    await queryInterface.dropTable('Quests');
   }
 };
