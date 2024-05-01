@@ -20,7 +20,10 @@ module.exports = (sequelize, DataTypes) => {
         }
     }
     User.init({
-        username:DataTypes.STRING,
+        username:{
+        type: DataTypes.INTEGER,
+        primaryKey: true
+    },
         email: DataTypes.STRING,
         password: DataTypes.STRING,
         name: DataTypes.STRING,
@@ -29,6 +32,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         sequelize,
         modelName: 'User',
+        primaryKey: false // Set to false to disable automatic primary key creation
     });
     return User;
 };
