@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
     description: DataTypes.STRING,
     category: DataTypes.STRING,
     credits: DataTypes.INTEGER,
-    status: DataTypes.STRING
+    status: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'Quest',

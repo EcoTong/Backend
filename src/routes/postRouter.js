@@ -103,9 +103,10 @@ postRouter.get("/like/:post_id", async (req, res) => {
         post_id,
       },
     });
+    const banyak = likes.length;
     res.status(200).json({
       status: "success",
-      data: likes,
+      banyak_like: banyak,
     });
   } catch (error) {
     res.status(500).json({
@@ -114,7 +115,82 @@ postRouter.get("/like/:post_id", async (req, res) => {
     });
   }
 });
-
+//bikin api buat nambah comment pada post
+postRouter.post("/comment", async (req, res) => {
+  try {
+    let { post_id, username, content } = req.body;
+    let id = "COMMENT_" + post_id + "_" + username;
+    const newComment = await db.Comment.create({
+      id,
+      post_id,
+      username,
+      content,
+    });
+    res.status(201).json({
+      status: "success",
+      data: newComment,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+});
+//bikin api buat bookmark post 
+postRouter.post("/bookmark", async (req, res) => {
+  try {
+    let { post_id, username } = req.body;
+    let id = "BOOKMARK_" + post_id + "_" + username;
+    const bookmark = await db.Bookmark.create({
+      id,
+      post_id,
+      username,
+    });
+    res.status(201).json({
+      status: "success",
+      data: bookmark,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+});
+//bikin api buat unbookmark post
+postRouter.delete("/unbookmark", async (req, res) => {
+  try {
+    let { id } = req.body;
+    const bookmark = await db.Bookmark.findOne({
+      where: {
+        id,
+      },
+    });
+    if (bookmark == null) {
+      res.status(400).json({
+        status: "error",
+        message: "Bookmark not found",
+      });
+      return;
+    } else {
+      await db.Bookmark.destroy({
+        where: {
+          id,
+        },
+      });
+      res.status(200).json({
+        status: "success",
+        message: "Unbookmark success",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+});
 function formatDate(date) {
   // Get the year, month, day, hours, minutes, and seconds
   let year = date.getFullYear();
