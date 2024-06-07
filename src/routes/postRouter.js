@@ -4,7 +4,51 @@ const postRouter = express.Router();
 const { Op } = require("sequelize");
 const db = require("../models");
 const { post } = require("./userRouter");
+require("dotenv").config();
+const jwt = require("jsonwebtoken");
+const JWT_KEY = process.env.JWT_SECRET;
 
+async function validateToken(req, res, next) {
+  const bearerHeader = req.headers["authorization"];
+  if (
+    typeof bearerHeader !== "undefined" ||
+    bearerHeader !== null ||
+    bearerHeader !== ""
+  ) {
+    const bearerToken = bearerHeader;
+    console.log("ini token " + bearerToken);
+    let userdata;
+    try {
+      userdata = jwt.verify(bearerToken, JWT_KEY);
+    } catch (error) {
+      return res.status(403).json({
+        status: "error",
+        message:
+          "Forbidden, you are not authorized to access this page (token invalid)",
+      });
+    }
+    console.log("ini userdata" + userdata);
+    const user = await db.User.findOne({
+      where: { username: userdata.username },
+    });
+    if (!user) {
+      res.status(404).json({
+        status: "error",
+        message: "User not found, token invalid",
+      });
+      return;
+    } else {
+      req.user = user;
+    }
+    next();
+  } else {
+    res.status(403).json({
+      status: "error",
+      message:
+        "Forbidden, you are not authorized to access this page (no token provided)",
+    });
+  }
+}
 postRouter.get("/", async (req, res) => {
   try {
     const posts = await db.Post.findAll();
@@ -19,9 +63,10 @@ postRouter.get("/", async (req, res) => {
     });
   }
 });
-postRouter.post("/tambahpost", async (req, res) => {
+postRouter.post("/tambahpost", validateToken, async (req, res) => {
   try {
-    let { username, category, image } = req.body;
+    let { category, image } = req.body;
+    let { username } = req.user.username;
     let id = "POST_" + username + "_" + formatDate(new Date());
     const newPost = await db.Post.create({
       id,
@@ -40,9 +85,10 @@ postRouter.post("/tambahpost", async (req, res) => {
     });
   }
 });
-postRouter.post("/like", async (req, res) => {
+postRouter.post("/like/:id_post", validateToken, async (req, res) => {
   try {
-    let { post_id, username } = req.body;
+    let { username } = req.user.username;
+    let { post_id } = req.params.id_post;
     let id = "LIKE_" + post_id + "_" + username;
     const like = await db.Like.create({
       id,
@@ -60,9 +106,9 @@ postRouter.post("/like", async (req, res) => {
     });
   }
 });
-postRouter.delete("/unlike", async (req, res) => {
+postRouter.delete("/unlike/:id_post", validateToken, async (req, res) => {
   try {
-    let { id } = req.body;
+    let { id } = req.params.id_post;
     const like = await db.Like.findOne({
       where: {
         id,
@@ -95,7 +141,7 @@ postRouter.delete("/unlike", async (req, res) => {
   }
 });
 //bikin api buat ngambil semua like dari post_id
-postRouter.get("/like/:post_id", async (req, res) => {
+postRouter.get("/like/:post_id", validateToken, async (req, res) => {
   try {
     let { post_id } = req.params;
     const likes = await db.Like.findAll({
@@ -116,9 +162,11 @@ postRouter.get("/like/:post_id", async (req, res) => {
   }
 });
 //bikin api buat nambah comment pada post
-postRouter.post("/comment", async (req, res) => {
+postRouter.post("/comment/:id_post", validateToken, async (req, res) => {
   try {
-    let { post_id, username, content } = req.body;
+    let { content } = req.body;
+    let { username } = req.user.username;
+    let { post_id } = req.params.id_post;
     let id = "COMMENT_" + post_id + "_" + username;
     const newComment = await db.Comment.create({
       id,
@@ -137,10 +185,12 @@ postRouter.post("/comment", async (req, res) => {
     });
   }
 });
-//bikin api buat bookmark post 
-postRouter.post("/bookmark", async (req, res) => {
+//bikin api buat bookmark post
+postRouter.post("/bookmark/:id_post", validateToken, async (req, res) => {
   try {
-    let { post_id, username } = req.body;
+    // let {  username } = req.body;
+    let { username } = req.user.username;
+    let { post_id } = req.params.id_post;
     let id = "BOOKMARK_" + post_id + "_" + username;
     const bookmark = await db.Bookmark.create({
       id,
@@ -159,9 +209,9 @@ postRouter.post("/bookmark", async (req, res) => {
   }
 });
 //bikin api buat unbookmark post
-postRouter.delete("/unbookmark", async (req, res) => {
+postRouter.delete("/unbookmark/:id_post", async (req, res) => {
   try {
-    let { id } = req.body;
+    let { id } = req.params.id_post;
     const bookmark = await db.Bookmark.findOne({
       where: {
         id,

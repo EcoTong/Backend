@@ -64,7 +64,7 @@ app.get("/auth/google/callback", async (req, res) => {
         user = await db.User.create({
           email: data.email,
           username: data.name,
-          password: hash_password,
+          password: "",
           name: data.name,
           profile_picture: "default.jpg",
           credits: 0,

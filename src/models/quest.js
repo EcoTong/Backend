@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'username'
       });
     }
-  }
+  } 
   Quest.init({
     id: {
       allowNull: false,
@@ -25,8 +25,10 @@ module.exports = (sequelize, DataTypes) => {
     username: DataTypes.STRING,
     title: DataTypes.STRING,
     description: DataTypes.STRING,
+    prize: DataTypes.INTEGER,
     category: DataTypes.STRING,
     credits: DataTypes.INTEGER,
+    picture: DataTypes.STRING,
     status: DataTypes.BOOLEAN
   }, {
     sequelize,
