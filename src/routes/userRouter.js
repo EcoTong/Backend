@@ -76,8 +76,8 @@ userRouter.post("/register", async (req, res) => {
 
 userRouter.post("/login", async (req, res) => {
   try {
-    let { username, password } = req.body;
-    const user = await db.User.findOne({ where: { username: username } });
+    let { email, password } = req.body;
+    const user = await db.User.findOne({ where: { email: email } });
     if (user) {
       if (bcrypt.compareSync(password, user.password)) {
         let token = jwt.sign(
