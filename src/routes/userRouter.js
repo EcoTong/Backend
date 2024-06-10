@@ -92,7 +92,7 @@ userRouter.post("/login", async (req, res) => {
           status: "success",
           token: token,
         });
-      } else {x
+      } else {
         res.status(400).json({
           status: "error",
           message: "Wrong Password",
