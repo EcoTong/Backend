@@ -49,6 +49,34 @@ async function validateToken(req, res, next) {
     });
   }
 }
+//buat api buat ngambil satu post by id post
+postRouter.get("/:id", async (req, res) => {
+  try {
+    let { id } = req.params;
+    const post = await db.Post.findOne({
+      where: {
+        id,
+      },
+    });
+    if (post == null) {
+      res.status(404).json({
+        status: "error",
+        message: "Post not found",
+      });
+      return;
+    }
+    res.status(200).json({
+      status: "success",
+      data: post,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+});
+
 postRouter.get("/", async (req, res) => {
   try {
     const posts = await db.Post.findAll();

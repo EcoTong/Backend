@@ -89,6 +89,72 @@ questRouter.post("/tambahquest", validateToken, async (req, res) => {
     });
   }
 });
+//bikin api buat update quest
+questRouter.put("/updatequest/:id", validateToken, async (req, res) => {
+  try {
+    let username = req.user.username;
+    let id = req.params.id;
+    const quest = await db.Quest.findOne({
+      where: {
+        id,
+        username,
+      },
+    });
+    if (!quest) {
+      res.status(404).json({
+        status: "error",
+        message: "Quest not found",
+      });
+      return;
+    }
+    
+    //find the user and add the credits
+    const user = await db.User.findOne({
+      where: { username },
+    });
+    user.credits += quest.prize;
+    await user.save();
+
+    quest.status = true;
+    await quest.save();
+    res.status(200).json({
+      status: "success selesai quest",
+      data: quest,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+});
+//bikin api buat ambil quest berdasarkan id quest
+questRouter.get("/:id", async (req, res) => {
+  try {
+    let { id } = req.params;
+    const quest = await db.Quest.findOne({
+      where: {
+        id,
+      },
+    });
+    if (quest == null) {
+      res.status(404).json({
+        status: "error",
+        message: "Quest not found",
+      });
+      return;
+    }
+    res.status(200).json({
+      status: "success",
+      data: quest,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+});
 function formatDate(date) {
   // Get the year, month, day, hours, minutes, and seconds
   let year = date.getFullYear();
