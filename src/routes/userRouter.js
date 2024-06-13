@@ -10,7 +10,49 @@ const db = require("../models");
 const jwt = require("jsonwebtoken");
 const JWT_KEY = process.env.JWT_SECRET;
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS);
-
+const multer = require("multer");
+const path = require("path");
+async function validateToken(req, res, next) {
+  const bearerHeader = req.headers["authorization"];
+  if (
+    typeof bearerHeader !== "undefined" ||
+    bearerHeader !== null ||
+    bearerHeader !== ""
+  ) {
+    const bearerToken = bearerHeader;
+    console.log("ini token " + bearerToken);
+    let userdata;
+    try {
+      userdata = jwt.verify(bearerToken, JWT_KEY);
+    } catch (error) {
+      return res.status(403).json({
+        status: "error",
+        message:
+          "Forbidden, you are not authorized to access this page (token invalid)",
+      });
+    }
+    console.log("ini userdata" + userdata);
+    const user = await db.User.findOne({
+      where: { username: userdata.username },
+    });
+    if (!user) {
+      res.status(404).json({
+        status: "error",
+        message: "User not found, token invalid",
+      });
+      return;
+    } else {
+      req.user = user;
+    }
+    next();
+  } else {
+    res.status(403).json({
+      status: "error",
+      message:
+        "Forbidden, you are not authorized to access this page (no token provided)",
+    });
+  }
+}
 userRouter.get("/", async (req, res) => {
   try {
     const users = await User.findAll();
@@ -111,5 +153,60 @@ userRouter.post("/login", async (req, res) => {
     });
   }
 });
+
+//buatkan api untuk mengganti profile picture
+// Configure Multer storage to rename files
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/profilepictures"); // Specify the destination directory
+  },
+  filename: (req, file, cb) => {
+    // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname); // Get the file extension
+    cb(null, file.fieldname + "-" + req.user.username + ext); // Create a new file name
+    req.file = file.fieldname + "-" + req.user.username + ext;
+    // next();
+  },
+});
+
+const upload = multer({ storage: storage });
+userRouter.put(
+  "/profile_picture",
+  validateToken,
+  upload.single("fotoprofile"),
+  async (req, res) => {
+    try {
+      const file = req.file;
+      const filename = file.filename; // Get the filename
+      console.log("File Object:", JSON.stringify(req.file, null, 2)); // Logs the file object with formatting
+      console.log("ini object file " + filename);
+      
+      let username = req.user.username;
+      const user = await db.User.findOne({
+        where: {
+          username,
+        },
+      });
+      if (user == null) {
+        res.status(404).json({
+          status: "error",
+          message: "User not found",
+        });
+        return;
+      }
+      user.profile_picture = filename;
+      await user.save();
+      res.status(200).json({
+        status: "success",
+        data: user,
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: "error",
+        message: error.message,
+      });
+    }
+  }
+);
 
 module.exports = userRouter;

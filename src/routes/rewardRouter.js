@@ -7,7 +7,8 @@ const reward = require("../models/reward");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const JWT_KEY = process.env.JWT_SECRET;
-
+const multer = require("multer");
+const path = require("path");
 async function validateToken(req, res, next) {
   const bearerHeader = req.headers["authorization"];
   if (
@@ -49,6 +50,27 @@ async function validateToken(req, res, next) {
     });
   }
 }
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/rewards/"); // Specify the destination directory
+  },
+  filename: (req, file, cb) => {
+    // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname); // Get the file extension
+    cb(
+      null,
+      file.fieldname +
+        "-" +
+        "REWARD_" +
+        formatDate(new Date()) +
+        ext
+    ); // Create a new file name
+    // req.file = file.fieldname + "-" + req.user.username + ext;
+    // next();
+  },
+});
+
+const upload = multer({ storage: storage });
 rewardRouter.get("/", async (req, res) => {
   try {
     const rewards = await db.Reward.findAll();
@@ -90,8 +112,10 @@ rewardRouter.get("/:id", validateToken, async (req, res) => {
     });
   }
 });
-rewardRouter.post("/tambahreward", async (req, res) => {
-  const { name, point, picture, description } = req.body;
+rewardRouter.post("/tambahreward", upload.single('fotoreward'), async (req, res) => {
+  const { name, point, description } = req.body;
+  const file = req.file;
+  const picture = file.filename;
   let id = "REWARD_" + name + "_" + formatDate(new Date());
   try {
     const reward = await db.Reward.create({
@@ -113,70 +137,70 @@ rewardRouter.post("/tambahreward", async (req, res) => {
   }
 });
 //bikin api buat update reward
-rewardRouter.put("/updatereward/:id", async (req, res) => {
-  try {
-    let id = req.params.id;
-    const reward = await db.Reward.findOne({
-      where: {
-        id,
-      },
-    });
-    if (!reward) {
-      res.status(404).json({
-        status: "error",
-        message: "Reward not found",
-      });
-      return;
-    }
-    reward.name = req.body.name;
-    reward.point = req.body.point;
-    reward.picture = req.body.picture;
-    reward.description = req.body.description;
-    await reward.save();
+// rewardRouter.put("/updatereward/:id", async (req, res) => {
+//   try {
+//     let id = req.params.id;
+//     const reward = await db.Reward.findOne({
+//       where: {
+//         id,
+//       },
+//     });
+//     if (!reward) {
+//       res.status(404).json({
+//         status: "error",
+//         message: "Reward not found",
+//       });
+//       return;
+//     }
+//     reward.name = req.body.name;
+//     reward.point = req.body.point;
+//     reward.picture = req.body.picture;
+//     reward.description = req.body.description;
+//     await reward.save();
 
-    res.status(200).json({
-      status: "success",
-      data: reward,
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "error",
-      message: error.message,
-    });
-  }
-});
-//bikin api buat delete reward
-rewardRouter.delete("/deletereward/:id", async (req, res) => {
-  try {
-    let { id } = req.params;
-    const reward = await db.Reward.findOne({
-      where: {
-        id,
-      },
-    });
-    if (reward == null) {
-      res.status(404).json({
-        status: "error",
-        message: "Reward not found",
-      });
-      return;
-    }
-    await db.Reward.destroy({
-      where: {
-        id,
-      },
-    });
-    res.status(200).json({
-      status: "success",
-      message: "Reward deleted",
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "error",
-      message: error.message,
-    });
-  }
-});
+//     res.status(200).json({
+//       status: "success",
+//       data: reward,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       status: "error",
+//       message: error.message,
+//     });
+//   }
+// });
+// //bikin api buat delete reward
+// rewardRouter.delete("/deletereward/:id", async (req, res) => {
+//   try {
+//     let { id } = req.params;
+//     const reward = await db.Reward.findOne({
+//       where: {
+//         id,
+//       },
+//     });
+//     if (reward == null) {
+//       res.status(404).json({
+//         status: "error",
+//         message: "Reward not found",
+//       });
+//       return;
+//     }
+//     await db.Reward.destroy({
+//       where: {
+//         id,
+//       },
+//     });
+//     res.status(200).json({
+//       status: "success",
+//       message: "Reward deleted",
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       status: "error",
+//       message: error.message,
+//     });
+//   }
+// });
 
 //bikin api buat user redeem reward 
 rewardRouter.post("/redeemreward/:id", validateToken, async (req, res) => {
@@ -233,7 +257,7 @@ function formatDate(date) {
   let seconds = padZero(date.getSeconds());
 
   // Format the date as "YYYY-MM-DD HH:mm:ss"
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  return `${year}-${month}-${day} ${hours} ${minutes} ${seconds}`;
 }
 
 // Function to pad single digit numbers with a leading zero

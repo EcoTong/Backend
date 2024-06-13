@@ -6,6 +6,8 @@ const db = require("../models");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const JWT_KEY = process.env.JWT_SECRET;
+const multer = require("multer");
+const path = require("path");
 questRouter.get("/", async (req, res) => {
   try {
     const quests = await db.Quest.findAll();
@@ -62,37 +64,66 @@ async function validateToken(req, res, next) {
     });
   }
 }
-
-//bikin api buat post quest
-questRouter.post("/tambahquest", validateToken, async (req, res) => {
-  try {
-    let { prize, description, category, picture } = req.body;
-    let username = req.user.username;
-    let id = "QUEST_" + username + "_" + formatDate(new Date());
-    const newQuest = await db.Quest.create({
-      id,
-      username,
-      prize,
-      description,
-      category,
-      picture,
-      status: false,
-    });
-    res.status(201).json({
-      status: "success",
-      data: newQuest,
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "error",
-      message: error.message,
-    });
-  }
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/quests/"); // Specify the destination directory
+  },
+  filename: (req, file, cb) => {
+    // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname); // Get the file extension
+    cb(
+      null,
+      file.fieldname +
+        "-" +
+        "QUEST_" +
+        req.user.username +
+        "_" +
+        formatDate(new Date()) +
+        ext
+    ); // Create a new file name
+    // req.file = file.fieldname + "-" + req.user.username + ext;
+    // next();
+  },
 });
+
+const upload = multer({ storage: storage });
+//bikin api buat post quest
+questRouter.post(
+  "/tambahquest",
+  validateToken,
+  upload.single("fotoquest"),
+  async (req, res) => {
+    try {
+      let { prize, description, category } = req.body;
+      const file = req.file;
+      const filename = file.filename; // Get the filename
+      let username = req.user.dataValues.username;
+      let id = "QUEST_" + username + "_" + formatDate(new Date());
+      const newQuest = await db.Quest.create({
+        id,
+        username,
+        prize,
+        description,
+        category,
+        picture: filename,
+        status: false,
+      });
+      res.status(201).json({
+        status: "success",
+        data: newQuest,
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: "error",
+        message: error.message,
+      });
+    }
+  }
+);
 //bikin api buat update quest
 questRouter.put("/updatequest/:id", validateToken, async (req, res) => {
   try {
-    let username = req.user.username;
+    let username = req.user.dataValues.username;
     let id = req.params.id;
     const quest = await db.Quest.findOne({
       where: {
@@ -107,7 +138,7 @@ questRouter.put("/updatequest/:id", validateToken, async (req, res) => {
       });
       return;
     }
-    
+
     //find the user and add the credits
     const user = await db.User.findOne({
       where: { username },
@@ -165,7 +196,7 @@ function formatDate(date) {
   let seconds = padZero(date.getSeconds());
 
   // Format the date as "YYYY-MM-DD HH:mm:ss"
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  return `${year}-${month}-${day} ${hours} ${minutes} ${seconds}`;
 }
 
 // Function to pad single digit numbers with a leading zero

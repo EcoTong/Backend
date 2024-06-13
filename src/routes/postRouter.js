@@ -7,7 +7,8 @@ const { post } = require("./userRouter");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const JWT_KEY = process.env.JWT_SECRET;
-
+const multer = require("multer");
+const path = require("path");
 async function validateToken(req, res, next) {
   const bearerHeader = req.headers["authorization"];
   if (
@@ -91,31 +92,54 @@ postRouter.get("/", async (req, res) => {
     });
   }
 });
-postRouter.post("/tambahpost", validateToken, async (req, res) => {
-  try {
-    let { category, image } = req.body;
-    let { username } = req.user.username;
-    let id = "POST_" + username + "_" + formatDate(new Date());
-    const newPost = await db.Post.create({
-      id,
-      username,
-      picture: image,
-      category,
-    });
-    res.status(201).json({
-      status: "success",
-      data: newPost,
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "error",
-      message: error.message,
-    });
-  }
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/posts/"); // Specify the destination directory
+  },
+  filename: (req, file, cb) => {
+    // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname); // Get the file extension
+    cb(null, file.fieldname + "-" + "POST_" + req.user.username + "_" + formatDate(new Date()) + ext); // Create a new file name
+    // req.file = file.fieldname + "-" + req.user.username + ext;
+    // next();
+  },
 });
+
+const upload = multer({ storage: storage });
+postRouter.post(
+  "/tambahpost",
+  validateToken,
+  upload.single("fotopost"),
+  async (req, res) => {
+    try {
+      const file = req.file;
+      const filename = file.filename; // Get the filename
+      let { category } = req.body;
+      let username = req.user.dataValues.username;
+      console.log(req.user.dataValues.username);
+      let id = "POST_" + username + "_" + formatDate(new Date());
+      const newPost = await db.Post.create({
+        id,
+        username,
+        picture: filename,
+        category,
+      });
+      res.status(201).json({
+        status: "success",
+        data: newPost,
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: "error",
+        message: error.message,
+      });
+    }
+  }
+);
 postRouter.post("/like/:id_post", validateToken, async (req, res) => {
   try {
-    let { username } = req.user.username;
+    let  username  = req.user.dataValues.username;
     let { post_id } = req.params.id_post;
     let id = "LIKE_" + post_id + "_" + username;
     const like = await db.Like.create({
@@ -193,7 +217,7 @@ postRouter.get("/like/:post_id", validateToken, async (req, res) => {
 postRouter.post("/comment/:id_post", validateToken, async (req, res) => {
   try {
     let { content } = req.body;
-    let { username } = req.user.username;
+    let  username  = req.user.dataValues.username;
     let { post_id } = req.params.id_post;
     let id = "COMMENT_" + post_id + "_" + username;
     const newComment = await db.Comment.create({
@@ -217,7 +241,7 @@ postRouter.post("/comment/:id_post", validateToken, async (req, res) => {
 postRouter.post("/bookmark/:id_post", validateToken, async (req, res) => {
   try {
     // let {  username } = req.body;
-    let { username } = req.user.username;
+    let  username  = req.user.dataValues.username;
     let { post_id } = req.params.id_post;
     let id = "BOOKMARK_" + post_id + "_" + username;
     const bookmark = await db.Bookmark.create({
@@ -279,7 +303,7 @@ function formatDate(date) {
   let seconds = padZero(date.getSeconds());
 
   // Format the date as "YYYY-MM-DD HH:mm:ss"
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  return `${year}-${month}-${day} ${hours} ${minutes} ${seconds}`;
 }
 
 // Function to pad single digit numbers with a leading zero
