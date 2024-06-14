@@ -94,7 +94,7 @@ questRouter.post(
   upload.single("fotoquest"),
   async (req, res) => {
     try {
-      let { prize, description, category } = req.body;
+      let { prize, description, title } = req.body;
       const file = req.file;
       const filename = file.filename; // Get the filename
       let username = req.user.dataValues.username;
@@ -104,7 +104,7 @@ questRouter.post(
         username,
         prize,
         description,
-        category,
+        title,
         picture: filename,
         status: false,
       });

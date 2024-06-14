@@ -115,7 +115,7 @@ postRouter.post(
     try {
       const file = req.file;
       const filename = file.filename; // Get the filename
-      let { category } = req.body;
+      let { title } = req.body;
       let username = req.user.dataValues.username;
       console.log(req.user.dataValues.username);
       let id = "POST_" + username + "_" + formatDate(new Date());
@@ -123,7 +123,7 @@ postRouter.post(
         id,
         username,
         picture: filename,
-        category,
+        title,
       });
       res.status(201).json({
         status: "success",

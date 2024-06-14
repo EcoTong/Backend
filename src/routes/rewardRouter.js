@@ -57,14 +57,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname); // Get the file extension
-    cb(
-      null,
-      file.fieldname +
-        "-" +
-        "REWARD_" +
-        formatDate(new Date()) +
-        ext
-    ); // Create a new file name
+    cb(null, file.fieldname + "-" + "REWARD_" + formatDate(new Date()) + ext); // Create a new file name
     // req.file = file.fieldname + "-" + req.user.username + ext;
     // next();
   },
@@ -112,30 +105,35 @@ rewardRouter.get("/:id", validateToken, async (req, res) => {
     });
   }
 });
-rewardRouter.post("/tambahreward", upload.single('fotoreward'), async (req, res) => {
-  const { name, point, description } = req.body;
-  const file = req.file;
-  const picture = file.filename;
-  let id = "REWARD_" + name + "_" + formatDate(new Date());
-  try {
-    const reward = await db.Reward.create({
-      id,
-      name,
-      point,
-      picture,
-      description,
-    });
-    res.status(201).json({
-      status: "success",
-      data: reward,
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "error",
-      message: error.message,
-    });
+rewardRouter.post(
+  "/tambahreward",
+  upload.single("fotoreward"),
+  async (req, res) => {
+    const { name, point, description, title } = req.body;
+    const file = req.file;
+    const picture = file.filename;
+    let id = "REWARD_" + name + "_" + formatDate(new Date());
+    try {
+      const reward = await db.Reward.create({
+        id,
+        name,
+        title,
+        point,
+        picture,
+        description,
+      });
+      res.status(201).json({
+        status: "success",
+        data: reward,
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: "error",
+        message: error.message,
+      });
+    }
   }
-});
+);
 //bikin api buat update reward
 // rewardRouter.put("/updatereward/:id", async (req, res) => {
 //   try {
@@ -202,7 +200,7 @@ rewardRouter.post("/tambahreward", upload.single('fotoreward'), async (req, res)
 //   }
 // });
 
-//bikin api buat user redeem reward 
+//bikin api buat user redeem reward
 rewardRouter.post("/redeemreward/:id", validateToken, async (req, res) => {
   try {
     let { id } = req.params;
@@ -229,7 +227,13 @@ rewardRouter.post("/redeemreward/:id", validateToken, async (req, res) => {
     user.credits -= reward.point;
     await user.save();
     //create a new redeem
-    let redeem_id = "REDEEM_" + user.username + "_" + reward.id + "_" + formatDate(new Date());
+    let redeem_id =
+      "REDEEM_" +
+      user.username +
+      "_" +
+      reward.id +
+      "_" +
+      formatDate(new Date());
     const redeem = await db.UserReward.create({
       username: user.username,
       reward_id: reward.id,
