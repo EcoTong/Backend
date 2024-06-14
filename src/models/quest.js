@@ -27,7 +27,6 @@ module.exports = (sequelize, DataTypes) => {
     description: DataTypes.STRING,
     prize: DataTypes.INTEGER,
     category: DataTypes.STRING,
-    credits: DataTypes.INTEGER,
     picture: DataTypes.STRING,
     status: DataTypes.BOOLEAN
   }, {

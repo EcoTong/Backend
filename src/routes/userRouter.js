@@ -53,6 +53,37 @@ async function validateToken(req, res, next) {
     });
   }
 }
+userRouter.get("/profilepicture", validateToken, async (req, res) => {
+  try {
+    let username = req.user.dataValues.username;
+    console.log("ini username "+username)
+    const users = await User.findAll();
+    // use for to find the user by username
+    console.log("ini users "+users)
+    let user;
+    for (let i = 0; i < users.length; i++) {
+      if (users[i].username == username) {
+        user = users[i];
+        break;
+      }
+    }
+    console.log("ini user "+user)
+   
+    if (user == null) {
+      res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+      return;
+    }
+    res.sendFile(path.join(__dirname, "../../uploads/profilepictures", user.profile_picture));
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+});
 userRouter.get("/", async (req, res) => {
   try {
     const users = await User.findAll();
@@ -68,7 +99,34 @@ userRouter.get("/", async (req, res) => {
     });
   }
 });
-
+//buatkan api untuk mengambil satu user by username beserta serving foto profile
+userRouter.get("/:username", async (req, res) => {
+  try {
+    let { username } = req.params;
+    const user = await db.User.findOne({
+      where: {
+        username,
+      },
+    });
+    if (user == null) {
+      res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+      return;
+    }
+    res.status(200).json({
+      status: "success",
+      data: user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+});
+//buatkan api untuk mengambil foto profile username yang login saat ini dari folder lokasi foto disimpan
 userRouter.post("/register", async (req, res) => {
   try {
     let { username, email, password, name } = req.body;

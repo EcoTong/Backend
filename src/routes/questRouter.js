@@ -8,20 +8,7 @@ const jwt = require("jsonwebtoken");
 const JWT_KEY = process.env.JWT_SECRET;
 const multer = require("multer");
 const path = require("path");
-questRouter.get("/", async (req, res) => {
-  try {
-    const quests = await db.Quest.findAll();
-    res.status(200).json({
-      status: "success",
-      data: quests,
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "error",
-      message: error.message,
-    });
-  }
-});
+
 //make me a function as a middleware to validate the jwt token
 async function validateToken(req, res, next) {
   const bearerHeader = req.headers["authorization"];
@@ -64,6 +51,37 @@ async function validateToken(req, res, next) {
     });
   }
 }
+questRouter.get("/questpicture/:id", validateToken, async (req, res) => {
+  try {
+    let { id } = req.params;
+    console.log("ini id " + id)
+    const quest = await db.Quest.findOne({
+      where: {
+        id,
+      },
+    });
+    res.sendFile(path.join(__dirname, "../../uploads/quests", `${quest.picture}`));
+  } catch (error) {
+    res.status(500).json({
+      status: "errorrrr",
+      message: error.message,
+    });
+  }
+});
+questRouter.get("/", async (req, res) => {
+  try {
+    const quests = await db.Quest.findAll();
+    res.status(200).json({
+      status: "success",
+      data: quests,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+});
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "uploads/quests/"); // Specify the destination directory

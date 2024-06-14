@@ -64,6 +64,25 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
+rewardRouter.get("/rewardpicture/:id", validateToken, async (req, res) => {
+  try {
+    let { id } = req.params;
+    console.log("ini id " + id);
+    const reward = await db.Reward.findOne({
+      where: {
+        id,
+      },
+    });
+    res.sendFile(
+      path.join(__dirname, "../../uploads/rewards", `${reward.picture}`)
+    );
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+});
 rewardRouter.get("/", async (req, res) => {
   try {
     const rewards = await db.Reward.findAll();
@@ -79,7 +98,7 @@ rewardRouter.get("/", async (req, res) => {
   }
 });
 //bikin api buat ambil reward by id
-rewardRouter.get("/:id", validateToken, async (req, res) => {
+rewardRouter.get("/:id", async (req, res) => {
   try {
     let { id } = req.params;
     const reward = await db.Reward.findOne({

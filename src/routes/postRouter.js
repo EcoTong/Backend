@@ -50,6 +50,22 @@ async function validateToken(req, res, next) {
     });
   }
 }
+postRouter.get("/postingpicture/:id", validateToken, async (req, res) => {
+  try {
+    let { id } = req.params;
+    const post = await db.Post.findOne({
+      where: {
+        id,
+      },
+    });
+    res.sendFile(path.join(__dirname, "../../uploads/posts", `${post.picture}`));
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+});
 //buat api buat ngambil satu post by id post
 postRouter.get("/:id", async (req, res) => {
   try {
@@ -262,7 +278,7 @@ postRouter.post("/bookmark/:id_post", validateToken, async (req, res) => {
   }
 });
 //bikin api buat unbookmark post
-postRouter.delete("/unbookmark/:id_post", async (req, res) => {
+postRouter.delete("/unbookmark/:id_post",validateToken, async (req, res) => {
   try {
     let { id } = req.params.id_post;
     const bookmark = await db.Bookmark.findOne({
