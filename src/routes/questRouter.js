@@ -82,6 +82,27 @@ questRouter.get("/", async (req, res) => {
     });
   }
 });
+//bikin api buat ambil quest by username 
+questRouter.get("/:username", async (req, res) => {
+  try {
+    let { username } = req.params;
+    const quests = await db.Quest.findAll({
+      where: {
+        username,
+      },
+    });
+    res.status(200).json({
+      status: "success",
+      data: quests,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+});
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "uploads/quests/"); // Specify the destination directory

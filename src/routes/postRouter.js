@@ -108,6 +108,27 @@ postRouter.get("/", async (req, res) => {
     });
   }
 });
+//buat api buat ngambil post by username
+postRouter.get("/:username", async (req, res) => {
+  try {
+    let { username } = req.params;
+    const posts = await db.Post.findAll({
+      where: {
+        username,
+      },
+    });
+    res.status(200).json({
+      status: "success",
+      data: posts,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+});
+
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
