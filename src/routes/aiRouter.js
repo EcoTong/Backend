@@ -1,6 +1,6 @@
 const { response } = require("express");
 const express = require("express");
-const questRouter = express.Router();
+const aiRouter = express.Router();
 const { Op } = require("sequelize");
 const db = require("../models");
 require("dotenv").config();
