@@ -97,6 +97,13 @@ postRouter.get("/:id", async (req, res) => {
       });
       return;
     }
+    const comments = await db.Comment.findAll({
+      where: {
+        post_id: id,
+      },
+    });
+    post.dataValues.comments = comments;
+    console.log(post);
     res.status(200).json({
       status: "success",
       data: post,
