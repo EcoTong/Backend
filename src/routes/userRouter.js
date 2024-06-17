@@ -81,9 +81,16 @@ userRouter.get("/profilepicture", validateToken, async (req, res) => {
 userRouter.get("/", validateToken, async (req, res) => {
   try {
     // const users = await User.findAll();
+    let user = {
+      username: req.user.username,
+      email: req.user.email,
+      name: req.user.name,
+      profile_picture: req.user.profile_picture,
+      credits: req.user.credits,
+    };
     res.status(200).json({
       status: "success",
-      users: req.user,
+      users: user,
       //data: users,
     });
   } catch (error) {
