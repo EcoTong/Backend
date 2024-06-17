@@ -68,13 +68,14 @@ rewardRouter.get("/rewardpicture/:id", validateToken, async (req, res) => {
   try {
     let { id } = req.params;
     console.log("ini id " + id);
-    
-    const reward = await Reward.findOne({
-      where: {
-        id,
-      },
-    });
-    console.log("ini reward " + reward);
+    const rewards = await db.Reward.findAll();
+    let reward;
+    for (let i = 0; i < rewards.length; i++) {
+      if (rewards[i].id == id) {
+        reward = rewards[i];
+        break;
+      }
+    }
 
     if (!reward) {
       return res.status(404).json({

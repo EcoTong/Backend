@@ -55,14 +55,17 @@ questRouter.get("/questpicture/:id", validateToken, async (req, res) => {
   try {
     let { id } = req.params;
     console.log("ini id " + id);
-    
-    const quest = await Quest.findOne({
-      where: {
-        id,
-      },
-    });
+    const quests = await db.Quest.findAll();
+    //find the quest manually with for loop
+    let quest 
+    for (let i = 0; i < quests.length; i++) {
+      if (quests[i].id == id) {
+        quest = quests[i];
+        break;
+      }
+    }
     console.log("ini quest " + quest);
-
+    
     if (!quest) {
       return res.status(404).json({
         status: "error",
