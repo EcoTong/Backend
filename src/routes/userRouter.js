@@ -185,8 +185,9 @@ userRouter.post("/login", async (req, res) => {
             username: user.username,
             email: user.email,
           },
-          JWT_KEY,
-          { expiresIn: "36000s" }
+          JWT_KEY
+          // ,
+          // { expiresIn: "36000s" }
         );
         res.status(200).json({
           status: "success",
