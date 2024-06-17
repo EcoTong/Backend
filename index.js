@@ -10,7 +10,7 @@ const jwt = require("jsonwebtoken");
 const JWT_KEY = process.env.JWT_SECRET;
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS);
 const Router = require("./src/routes/Router");
-
+const path = require("path");
 const { OAuth2 } = google.auth;
 const oAuth2Client = new OAuth2(
   process.env.GOOGLE_CLIENT_ID,
@@ -179,6 +179,11 @@ app.post("/api/auth/google", async (req, res) => {
     res.status(400).json({ error: "Invalid token" });
   }
 });
+
+app.use('/postpictures', express.static(path.join(__dirname, 'uploads/posts')));
+app.use('/profilepictures', express.static(path.join(__dirname, 'uploads/profilepictures')));
+app.use('/rewardpictures', express.static(path.join(__dirname, 'uploads/rewards')));
+app.use('/questpictures', express.static(path.join(__dirname, 'uploads/quests')));
 
 const { PORT } = process.env;
 

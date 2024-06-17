@@ -53,12 +53,22 @@ async function validateToken(req, res, next) {
 postRouter.get("/postingpicture/:id", validateToken, async (req, res) => {
   try {
     let { id } = req.params;
-    const post = await db.Post.findOne({
+    const post = await Post.findOne({
       where: {
         id,
       },
     });
-    res.sendFile(path.join(__dirname, "../../uploads/posts", `${post.picture}`));
+
+    if (!post) {
+      return res.status(404).json({
+        status: "error",
+        message: "Post not found",
+      });
+    }
+
+    // Construct the URL to the post picture
+    const postPicturePath = `/postpictures/${post.picture}`;
+    res.redirect(postPicturePath);
   } catch (error) {
     res.status(500).json({
       status: "error",

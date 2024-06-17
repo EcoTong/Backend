@@ -54,16 +54,28 @@ async function validateToken(req, res, next) {
 questRouter.get("/questpicture/:id", validateToken, async (req, res) => {
   try {
     let { id } = req.params;
-    console.log("ini id " + id)
-    const quest = await db.Quest.findOne({
+    console.log("ini id " + id);
+    
+    const quest = await Quest.findOne({
       where: {
         id,
       },
     });
-    res.sendFile(path.join(__dirname, "../../uploads/quests", `${quest.picture}`));
+    console.log("ini quest " + quest);
+
+    if (!quest) {
+      return res.status(404).json({
+        status: "error",
+        message: "Quest not found",
+      });
+    }
+
+    // Construct the URL to the quest picture
+    const questPicturePath = `/questpictures/${quest.picture}`;
+    res.redirect(questPicturePath);
   } catch (error) {
     res.status(500).json({
-      status: "errorrrr",
+      status: "error",
       message: error.message,
     });
   }

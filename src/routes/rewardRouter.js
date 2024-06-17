@@ -68,14 +68,24 @@ rewardRouter.get("/rewardpicture/:id", validateToken, async (req, res) => {
   try {
     let { id } = req.params;
     console.log("ini id " + id);
-    const reward = await db.Reward.findOne({
+    
+    const reward = await Reward.findOne({
       where: {
         id,
       },
     });
-    res.sendFile(
-      path.join(__dirname, "../../uploads/rewards", `${reward.picture}`)
-    );
+    console.log("ini reward " + reward);
+
+    if (!reward) {
+      return res.status(404).json({
+        status: "error",
+        message: "Reward not found",
+      });
+    }
+
+    // Construct the URL to the reward picture
+    const rewardPicturePath = `/rewardpictures/${reward.picture}`;
+    res.redirect(rewardPicturePath);
   } catch (error) {
     res.status(500).json({
       status: "error",

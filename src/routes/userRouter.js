@@ -56,27 +56,21 @@ async function validateToken(req, res, next) {
 userRouter.get("/profilepicture", validateToken, async (req, res) => {
   try {
     let username = req.user.dataValues.username;
-    console.log("ini username "+username)
-    const users = await User.findAll();
-    // use for to find the user by username
-    console.log("ini users "+users)
-    let user;
-    for (let i = 0; i < users.length; i++) {
-      if (users[i].username == username) {
-        user = users[i];
-        break;
-      }
-    }
-    console.log("ini user "+user)
-   
-    if (user == null) {
-      res.status(404).json({
+    console.log("ini username " + username);
+    
+    const user = await User.findOne({ where: { username } });
+    console.log("ini user " + user);
+    
+    if (!user) {
+      return res.status(404).json({
         status: "error",
         message: "User not found",
       });
-      return;
     }
-    res.sendFile(path.join(__dirname, "../../uploads/profilepictures", user.profile_picture));
+
+    // Construct the URL to the profile picture
+    const profilePicturePath = `/profilepictures/${user.profile_picture}`;
+    res.redirect(profilePicturePath);
   } catch (error) {
     res.status(500).json({
       status: "error",
@@ -84,12 +78,12 @@ userRouter.get("/profilepicture", validateToken, async (req, res) => {
     });
   }
 });
-userRouter.get("/", async (req, res) => {
+userRouter.get("/", validateToken, async (req, res) => {
   try {
-    const users = await User.findAll();
+    // const users = await User.findAll();
     res.status(200).json({
       status: "success",
-      users: users,
+      users: req.user,
       //data: users,
     });
   } catch (error) {
