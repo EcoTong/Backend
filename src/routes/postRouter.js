@@ -302,7 +302,7 @@ postRouter.post("/comment/:id_post", validateToken, async (req, res) => {
   try {
     let { content } = req.body;
     let username = req.user.dataValues.username;
-    let { post_id } = req.params.id_post;
+    let  post_id  = req.params.id_post;
     let id = "COMMENT_" + post_id + "_" + username;
     const newComment = await db.Comment.create({
       id,
@@ -326,7 +326,7 @@ postRouter.post("/bookmark/:id_post", validateToken, async (req, res) => {
   try {
     // let {  username } = req.body;
     let username = req.user.dataValues.username;
-    let { post_id } = req.params.id_post;
+    let post_id  = req.params.id_post;
     let id = "BOOKMARK_" + post_id + "_" + username;
     const bookmark = await db.Bookmark.create({
       id,
