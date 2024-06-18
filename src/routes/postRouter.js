@@ -224,7 +224,7 @@ postRouter.post(
 postRouter.post("/like/:id_post", validateToken, async (req, res) => {
   try {
     let username = req.user.dataValues.username;
-    let  post_id  = req.params.id_post;
+    let post_id = req.params.id_post;
     let id = "LIKE_" + post_id + "_" + username;
     const like = await db.Like.create({
       id,
@@ -244,7 +244,7 @@ postRouter.post("/like/:id_post", validateToken, async (req, res) => {
 });
 postRouter.delete("/unlike/:id_post", validateToken, async (req, res) => {
   try {
-    let  id  = req.params.id_post;
+    let id = req.params.id_post;
     const like = await db.Like.findOne({
       where: {
         id,
@@ -302,8 +302,8 @@ postRouter.post("/comment/:id_post", validateToken, async (req, res) => {
   try {
     let { content } = req.body;
     let username = req.user.dataValues.username;
-    let  post_id  = req.params.id_post;
-    let id = "COMMENT_" + post_id + "_" + username;
+    let post_id = req.params.id_post;
+    let id = "COMMENT_" + post_id + "_" + username + "_" + formatDate(new Date());
     const newComment = await db.Comment.create({
       id,
       post_id,
@@ -326,8 +326,8 @@ postRouter.post("/bookmark/:id_post", validateToken, async (req, res) => {
   try {
     // let {  username } = req.body;
     let username = req.user.dataValues.username;
-    let post_id  = req.params.id_post;
-    let id = "BOOKMARK_" + post_id + "_" + username;
+    let post_id = req.params.id_post;
+    let id = "BOOKMARK_" + post_id + "_" + username + "_" + formatDate(new Date());
     const bookmark = await db.Bookmark.create({
       id,
       post_id,
@@ -347,7 +347,7 @@ postRouter.post("/bookmark/:id_post", validateToken, async (req, res) => {
 //bikin api buat unbookmark post
 postRouter.delete("/unbookmark/:id_post", validateToken, async (req, res) => {
   try {
-    let id  = req.params.id_post;
+    let id = req.params.id_post;
     const bookmark = await db.Bookmark.findOne({
       where: {
         id,
