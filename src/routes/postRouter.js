@@ -268,8 +268,8 @@ postRouter.delete("/unlike/:id_post", validateToken, async (req, res) => {
     } else {
       await db.Like.destroy({
         where: {
-          id,
-          //username
+          post_id: id,
+          username: req.user.dataValues.username,
         },
       });
       res.status(200).json({
@@ -371,7 +371,8 @@ postRouter.delete("/unbookmark/:id_post", validateToken, async (req, res) => {
     } else {
       await db.Bookmark.destroy({
         where: {
-          id,
+          post_id: id,
+          username: req.user.dataValues.username,
         },
       });
       res.status(200).json({
