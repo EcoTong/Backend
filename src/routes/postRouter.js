@@ -139,9 +139,16 @@ postRouter.get("/", validateToken, async (req, res) => {
           username: req.user.username,
         },
       });
+      const bookmarked = await db.Bookmark.findOne({
+        where: {
+          post_id: posts[i].id,
+          username: req.user.username,
+        },
+      });
       posts[i].likes = likes.length;
       posts[i].comments = comments.length;
       posts[i].liked = liked ? true : false;
+      posts[i].bookmarked = bookmarked ? true : false;
     }
     res.status(200).json({
       status: "success",
@@ -327,7 +334,7 @@ postRouter.post("/bookmark/:id_post", validateToken, async (req, res) => {
     // let {  username } = req.body;
     let username = req.user.dataValues.username;
     let post_id = req.params.id_post;
-    let id = "BOOKMARK_" + post_id + "_" + username + "_" + formatDate(new Date());
+    let id = "BOOKMARK_" + post_id + "_" + username;
     const bookmark = await db.Bookmark.create({
       id,
       post_id,
