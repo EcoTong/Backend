@@ -254,7 +254,8 @@ postRouter.delete("/unlike/:id_post", validateToken, async (req, res) => {
     let id = req.params.id_post;
     const like = await db.Like.findOne({
       where: {
-        id,
+        post_id: id,
+        username: req.user.dataValues.username,
       },
     });
     console.log(like);
@@ -357,7 +358,8 @@ postRouter.delete("/unbookmark/:id_post", validateToken, async (req, res) => {
     let id = req.params.id_post;
     const bookmark = await db.Bookmark.findOne({
       where: {
-        id,
+        post_id: id,
+        username: req.user.dataValues.username,
       },
     });
     if (bookmark == null) {

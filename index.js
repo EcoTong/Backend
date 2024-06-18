@@ -127,8 +127,7 @@ app.post("/api/auth/google", async (req, res) => {
           username: user.username,
           email: user.email,
         },
-        JWT_KEY,
-        { expiresIn: "7200s" }
+        JWT_KEY
       );
       res.status(200).json({
         status: "success login",
