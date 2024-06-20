@@ -53,7 +53,7 @@ async function validateToken(req, res, next) {
 }
 
 aiRouter.get("/generateAi", validateToken, async (req, res) => {
-    let { made_from, time1, time2 } = req.body;
+    let { made_from, time1, time2 } = req.query;
     try {
         const { VertexAI } = require('@google-cloud/vertexai');
 
@@ -95,7 +95,7 @@ aiRouter.get("/generateAi", validateToken, async (req, res) => {
                 contents: [
                     {
                         role: 'user', parts: [{
-                            text: `recommend me 1 handycraft made from ${made_from} the handycraft must be able to made between ${time1} to ${time2} days
+                            text: `recommend me only 1 inexpensive handycraft made from ${made_from} the handycraft must be able to made between ${time1} to ${time2} days for personal use and decoration with materials needed and steps
 `}]
                     }
                 ],
