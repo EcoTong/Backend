@@ -126,5 +126,48 @@ aiRouter.get("/generateAi", validateToken, async (req, res) => {
         });
     }
 });
+aiRouter.get("/history", validateToken, async (req, res) => {
+    try {
+        const history = await db.History.findAll({
+            where: {
+                username: req.user.username,
+            },
+        });
+        res.status(200).json({
+            status: "success",
+            data: history,
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: error.message,
+        });
+    }
+});
 
+aiRouter.get("/history/:id", validateToken, async (req, res) => {
+    try {
+        let { id } = req.params;
+        const history = await db.History.findOne({
+            where: {
+                id,
+            },
+        });
+        if (!history) {
+            return res.status(404).json({
+                status: "error",
+                message: "History not found",
+            });
+        }
+        res.status(200).json({
+            status: "success",
+            data: history,
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: error.message,
+        });
+    }
+});
 module.exports = aiRouter;
