@@ -107,6 +107,12 @@ aiRouter.get("/generateAi", validateToken, async (req, res) => {
         }
 
         const tempGenerated = await generateContent();
+        const history = await db.History.create({
+            username: req.user.username,
+            made_from: made_from,
+            instruction: tempGenerated.response.candidates[0].content.parts[0].text
+        });
+
         await res.status(200).json({
             status: "success",
             message: tempGenerated.response.candidates[0].content.parts[0].text,
